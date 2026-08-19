@@ -1,0 +1,58 @@
+name: scoop
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: scoop
+      POSTGRES_PASSWORD: scoop
+      POSTGRES_DB: scoop
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U scoop -d scoop"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    ports:
+      - "5433:5432"  # 5433 on host to avoid collisions with other local Postgres
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql+psycopg2://scoop:scoop@db:5432/scoop
+      DEFAULT_POSTCODE: "4000"
+      SCRAPE_CACHE_TTL_SECONDS: "1800"
+      SCRAPE_TIMEOUT_SECONDS: "15"
+      ENABLE_DANMURPHYS: "true"
+      ENABLE_BWS: "true"
+      ENABLE_LIQUORLAND: "true"
+      LOG_LEVEL: "INFO"
+      CORS_ORIGINS: "http://localhost:5173,http://127.0.0.1:5173,http://localhost"
+      PORT: "8000"
+      DB_HOST: db
+      DB_PORT: "5432"
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      PORT: "5173"
+    depends_on:
+      - backend
+    ports:
+      - "5173:5173"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

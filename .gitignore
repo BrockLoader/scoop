@@ -1,0 +1,39 @@
+# env
+.env
+.env.local
+*.env
+!.env.example
+
+# python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+*.egg-info/
+.venv/
+venv/
+backend/data/*.db
+backend/data/*.sqlite3
+backend/data/*.sqlite
+
+# node
+node_modules/
+dist/
+.vite/
+*.log
+frontend/vite.config.js
+frontend/vite.config.d.ts
+*.tsbuildinfo
+
+# os / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# docker
+*.pid
